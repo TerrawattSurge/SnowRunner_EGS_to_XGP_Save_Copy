@@ -2,7 +2,7 @@
 
 ### Find the Epic saved games ###
 try {
-	$epic_save_dir = $env:USERPROFILE + "\Documents\My Games\SnowRunner\base\storage\"
+	$epic_save_dir =  [Environment]::GetFolderPath('Personal') + "\My Games\SnowRunner\base\storage\"
 	$null = Test-Path -Path $epic_save_dir -ErrorAction Stop
 
 	$epic_save_dir = $epic_save_dir + (Get-ChildItem -directory $epic_save_dir | Where-Object {$_.Name -notlike "*backupSlots"} | select -ExpandProperty Name)
@@ -12,12 +12,12 @@ try {
 	Write-Host $epic_save_dir
 }
 catch {
-	Write-Warning "Can't find the Epic Games Snowrunner saved games. Expected at $epic_save_dir" -ErrorAction Stop
+	Write-Error "Can't find the Epic Games Snowrunner saved games. Expected at $epic_save_dir" -ErrorAction Stop
 }
 
 #### Find the XBox Game Pass saved games ###
 try {
-	$xgp_save_dir = $env:USERPROFILE + "\AppData\Local\Packages\"
+	$xgp_save_dir = [Environment]::GetFolderPath('LocalApplicationData') + "\Packages\"
 	$xgp_save_dir = $xgp_save_dir + (Get-ChildItem -directory $xgp_save_dir | Where-Object {$_.Name -like "FocusHomeInteractiveSA.SnowRunner*"} | select -ExpandProperty Name) + "\SystemAppData\wgs\"
 	$null = Test-Path -Path $xgp_save_dir -ErrorAction Stop
 
@@ -31,7 +31,7 @@ try {
 	Write-Host $xgp_save_dir
 }
 catch {
-	Write-Warning "Can't find the XBox Game Pass Snowrunner saved games. Expected at $xgp_save_dir" -ErrorAction Stop
+	Write-Error "Can't find the XBox Game Pass Snowrunner saved games. Expected at $xgp_save_dir" -ErrorAction Stop
 }
 
 ### Back up saved games as zip files ##
@@ -90,8 +90,8 @@ foreach ($file in (Get-ChildItem $xgp_save_dir | Where-Object {$_.Name -notlike 
         Copy-Item -Path "$epic_save_dir\$file_type.dat" -Destination $file.FullName
     }
     catch {
-        Write-Warning "Can't find $epic_save_dir\$file_type.dat" -ErrorAction Stop
+        Write-Warning "Can't find $epic_save_dir\$file_type.dat"
     }
 }
-Write-Host "All done!"
-Start-Sleep 3
+Write-Host "All done! Press any key to close"
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
